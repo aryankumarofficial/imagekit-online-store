@@ -16,6 +16,12 @@ type RecentOrderRow = {
     createdAt: string;
 };
 
+type SeriesPoint = {
+    date: string;
+    revenuePaise: number;
+    orders: number;
+};
+
 async function handler() {
     try {
         const session = await getServerSession(authOptions);
@@ -82,14 +88,9 @@ async function handler() {
             { $sort: { _id: 1 } },
         ]);
 
-        const dailyRevenueMap = new Map(
-            dailyRevenue.map((entry: { _id: string; revenuePaise: number; orders: number }) => [
-                entry._id,
-                entry,
-            ])
-        );
+        const dailyRevenueMap = new Map(dailyRevenue.map((entry: { _id: string; revenuePaise: number; orders: number }) => [entry._id, entry]));
 
-        const sevenDaySeries = Array.from({ length: 7 }, (_, index) => {
+        const sevenDaySeries: SeriesPoint[] = Array.from({ length: 7 }, (_, index) => {
             const date = new Date(startDate);
             date.setDate(startDate.getDate() + index);
             const key = date.toISOString().slice(0, 10);
@@ -101,6 +102,55 @@ async function handler() {
                 orders: hit?.orders ?? 0,
             };
         });
+
+        const monthCursor = new Date();
+        monthCursor.setDate(1);
+        monthCursor.setHours(0, 0, 0, 0);
+        monthCursor.setMonth(monthCursor.getMonth() - 5);
+
+        const monthlyRevenue = await Order.aggregate([
+            {
+                $match: {
+                    status: "completed",
+                    createdAt: { $gte: monthCursor },
+                },
+            },
+            {
+                $group: {
+                    _id: {
+                        $dateToString: { format: "%Y-%m", date: "$createdAt" },
+                    },
+                    revenuePaise: { $sum: "$amount" },
+                    orders: { $sum: 1 },
+                },
+            },
+            { $sort: { _id: 1 } },
+        ]);
+
+        const monthlyRevenueMap = new Map(monthlyRevenue.map((entry: { _id: string; revenuePaise: number; orders: number }) => [entry._id, entry]));
+
+        const sixMonthSeries: SeriesPoint[] = Array.from({ length: 6 }, (_, index) => {
+            const date = new Date(monthCursor);
+            date.setMonth(monthCursor.getMonth() + index);
+            const key = date.toISOString().slice(0, 7);
+            const hit = monthlyRevenueMap.get(key);
+
+            return {
+                date: key,
+                revenuePaise: hit?.revenuePaise ?? 0,
+                orders: hit?.orders ?? 0,
+            };
+        });
+
+        const statusBreakdown = await Order.aggregate([
+            {
+                $group: {
+                    _id: "$status",
+                    count: { $sum: 1 },
+                },
+            },
+            { $sort: { count: -1 } },
+        ]);
 
         const topProducts = await Order.aggregate([
             {
@@ -144,6 +194,8 @@ async function handler() {
                 },
                 recentOrders: recentOrdersFormatted,
                 dailyRevenue: sevenDaySeries,
+                monthlyRevenue: sixMonthSeries,
+                statusBreakdown,
                 topProducts,
             },
             { status: 200 }

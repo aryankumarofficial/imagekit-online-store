@@ -45,6 +45,15 @@ export interface AdminAnalyticsResponse {
         revenuePaise: number;
         orders: number;
     }>;
+    monthlyRevenue: Array<{
+        date: string;
+        revenuePaise: number;
+        orders: number;
+    }>;
+    statusBreakdown: Array<{
+        _id: string;
+        count: number;
+    }>;
     topProducts: Array<{
         productName: string;
         orders: number;

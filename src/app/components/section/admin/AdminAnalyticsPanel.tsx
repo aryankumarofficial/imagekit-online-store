@@ -2,7 +2,7 @@
 
 import {type ComponentType, useEffect, useMemo, useState} from "react";
 import {apiClient, AdminAnalyticsResponse} from "@/lib/api-client";
-import {BarChart3, Clock3, DollarSign, Package, RefreshCw, ShoppingBag, Users} from "lucide-react";
+import {BarChart3, Clock3, DollarSign, Package, RefreshCw, ShoppingBag, Users, Activity} from "lucide-react";
 
 const currency = new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -19,6 +19,14 @@ function formatDateLabel(dateString: string) {
         weekday: "short",
         month: "short",
         day: "numeric",
+    });
+}
+
+function formatMonthLabel(monthString: string) {
+    const [year, month] = monthString.split("-").map(Number);
+    return new Date(year, month - 1, 1).toLocaleDateString("en-IN", {
+        month: "short",
+        year: "2-digit",
     });
 }
 
@@ -85,6 +93,14 @@ export default function AdminAnalyticsPanel() {
 
     const maxDailyRevenue = useMemo(
         () => Math.max(1, ...(data?.dailyRevenue.map((entry) => entry.revenuePaise) ?? [1])),
+        [data]
+    );
+    const maxMonthlyRevenue = useMemo(
+        () => Math.max(1, ...(data?.monthlyRevenue.map((entry) => entry.revenuePaise) ?? [1])),
+        [data]
+    );
+    const totalOrders = useMemo(
+        () => data?.statusBreakdown.reduce((sum, item) => sum + item.count, 0) ?? 0,
         [data]
     );
 
@@ -223,6 +239,65 @@ export default function AdminAnalyticsPanel() {
                                 No completed sales yet.
                             </div>
                         )}
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+                <div className="rounded-2xl border border-base-200 bg-base-50 p-5">
+                    <div className="flex items-center justify-between gap-4">
+                        <div>
+                            <h3 className="text-lg font-semibold">6 month revenue</h3>
+                            <p className="text-sm text-base-content/60">Completed order trend by month</p>
+                        </div>
+                        <Activity className="h-4 w-4 text-base-content/40" />
+                    </div>
+
+                    <div className="mt-6 flex h-56 items-end gap-3 rounded-2xl bg-base-100 p-4">
+                        {data.monthlyRevenue.map((entry) => {
+                            const barHeight = `${Math.max(8, (entry.revenuePaise / maxMonthlyRevenue) * 100)}%`;
+                            return (
+                                <div key={entry.date} className="flex-1 min-w-0 text-center">
+                                    <div className="flex h-36 items-end justify-center">
+                                        <div
+                                            className="w-full max-w-12 rounded-t-2xl bg-secondary/80 transition-all"
+                                            style={{ height: barHeight }}
+                                            title={`${formatMonthLabel(entry.date)} - ${formatMoney(entry.revenuePaise)}`}
+                                        />
+                                    </div>
+                                    <div className="mt-3 text-[11px] font-medium text-base-content/60">{formatMonthLabel(entry.date)}</div>
+                                    <div className="text-xs font-semibold text-base-content">{formatMoney(entry.revenuePaise)}</div>
+                                    <div className="text-[11px] text-base-content/50">{entry.orders} order{entry.orders === 1 ? "" : "s"}</div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div className="rounded-2xl border border-base-200 bg-base-50 p-5">
+                    <div className="flex items-center justify-between gap-4">
+                        <div>
+                            <h3 className="text-lg font-semibold">Order status</h3>
+                            <p className="text-sm text-base-content/60">Breakdown of all orders in the system</p>
+                        </div>
+                        <Activity className="h-4 w-4 text-base-content/40" />
+                    </div>
+
+                    <div className="mt-5 space-y-4">
+                        {data.statusBreakdown.map((item) => {
+                            const percent = totalOrders > 0 ? Math.round((item.count / totalOrders) * 100) : 0;
+                            return (
+                                <div key={item._id} className="space-y-2 rounded-2xl border border-base-200 bg-base-100 p-4">
+                                    <div className="flex items-center justify-between gap-4 text-sm">
+                                        <span className="font-semibold capitalize">{item._id}</span>
+                                        <span className="text-base-content/60">{item.count} orders • {percent}%</span>
+                                    </div>
+                                    <div className="h-2 overflow-hidden rounded-full bg-base-200">
+                                        <div className="h-full rounded-full bg-primary" style={{ width: `${Math.max(4, percent)}%` }} />
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
