@@ -4,6 +4,7 @@ import Product, {IProduct} from "@/models/Product";
 import {getServerSession} from "next-auth";
 import {authOptions} from "@/lib/auth";
 import {z} from "zod";
+import {normalizeImagePath} from "@/lib/imagekit-url";
 
 const productSchema = z.object({
     name: z.string().min(1),
@@ -57,7 +58,10 @@ const postHandler = async (request: NextRequest) => {
             })
         }
 
-        const newProduct: IProduct = await Product.create(validation.data);
+        const newProduct: IProduct = await Product.create({
+            ...validation.data,
+            imageUrl: normalizeImagePath(validation.data.imageUrl),
+        });
         return NextResponse.json({
             newProduct,
         }, {

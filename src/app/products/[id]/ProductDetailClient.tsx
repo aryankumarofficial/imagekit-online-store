@@ -10,6 +10,7 @@ import {useSession} from "next-auth/react";
 import {apiClient} from "@/lib/api-client";
 import {Transformation} from "@imagekit/next";
 import Link from "next/link";
+import {normalizeImagePath} from "@/lib/imagekit-url";
 
 export default function ProductDetailClient({product}: {product: IProduct}) {
     const [selectedVariant, setSelectedVariant] = useState<ImageVariant | null>(null);
@@ -104,7 +105,7 @@ export default function ProductDetailClient({product}: {product: IProduct}) {
                     >
                         <IKImage
                             urlEndpoint={process.env.NEXT_PUBLIC_URL_ENDPOINT}
-                            path={product.imageUrl}
+                            path={normalizeImagePath(product.imageUrl)}
                             alt={product.name}
                             transformation={
                                 selectedVariant

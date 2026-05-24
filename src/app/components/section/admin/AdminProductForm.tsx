@@ -8,6 +8,7 @@ import { Loader2, Plus, Trash2 } from "lucide-react";
 import { useNotification } from "../../Notification";
 import { IMAGE_VARIANTS, ImageVariantType, IProduct } from "@/models/Product";
 import { apiClient, ProductFormData } from "@/lib/api-client";
+import { normalizeImagePath } from "@/lib/imagekit-url";
 
 type Props = {
     initialData?: IProduct | null;
@@ -54,10 +55,7 @@ export default function AdminProductForm({ initialData = null, onSuccess }: Prop
     });
 
     const handleUploadSuccess = (response: IKUploadResponse) => {
-        // Construct full public URL using the configured ImageKit endpoint
-        const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || process.env.NEXT_PUBLIC_URL_ENDPOINT || "";
-        const fullUrl = `${urlEndpoint}${response.filePath}`;
-        setValue("imageUrl", fullUrl);
+        setValue("imageUrl", normalizeImagePath(response.filePath));
         showNotification("Image uploaded successfully!", "success");
     };
 
@@ -219,6 +217,8 @@ export default function AdminProductForm({ initialData = null, onSuccess }: Prop
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         Creating Product...
                     </>
+                ) : initialData ? (
+                    "Update Product"
                 ) : (
                     "Create Product"
                 )}

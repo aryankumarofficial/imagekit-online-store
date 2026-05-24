@@ -5,6 +5,7 @@ import Product from "@/models/Product";
 import {z} from "zod";
 import {getServerSession} from "next-auth";
 import {authOptions} from "@/lib/auth";
+import {normalizeImagePath} from "@/lib/imagekit-url";
 
 async function handler(
     _request: NextRequest,
@@ -66,7 +67,10 @@ const putHandler = async (request: NextRequest, props: { params: Promise<{ id: s
             return NextResponse.json({ error: "Invalid fields", details: validation.error.issues }, { status: 400 });
         }
 
-        const updated = await Product.findByIdAndUpdate(id, validation.data, { new: true });
+        const updated = await Product.findByIdAndUpdate(id, {
+            ...validation.data,
+            imageUrl: normalizeImagePath(validation.data.imageUrl),
+        }, { new: true });
         if (!updated) {
             return NextResponse.json({ error: 'Product not found' }, { status: 404 });
         }

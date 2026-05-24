@@ -2,6 +2,7 @@ import { IKImage } from "imagekitio-next";
 import Link from "next/link";
 import { IProduct, IMAGE_VARIANTS } from "@/models/Product";
 import { Eye } from "lucide-react";
+import { normalizeImagePath } from "@/lib/imagekit-url";
 
 export default function ProductCard({ product, priority = false }: { product: IProduct; priority?: boolean }) {
     const lowestPrice = product.variants.reduce(
@@ -25,7 +26,7 @@ export default function ProductCard({ product, priority = false }: { product: IP
                         }}
                     >
                         <IKImage
-                            path={product.imageUrl}
+                            path={normalizeImagePath(product.imageUrl)}
                             alt={product.name}
                             loading={priority ? "eager" : "lazy"}
                             transformation={[
