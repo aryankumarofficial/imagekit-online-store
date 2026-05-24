@@ -37,7 +37,7 @@ export default function Header() {
                 </div>
                 <div className="flex flex-none items-center gap-2">
                     <nav className="hidden md:flex items-center gap-1 mr-2">
-                        <Link href="/#catalog" className="btn btn-ghost btn-sm gap-2">
+                        <Link href="/" className="btn btn-ghost btn-sm gap-2">
                             <LayoutGrid className="w-4 h-4"/>
                             Catalog
                         </Link>

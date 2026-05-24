@@ -1,11 +1,13 @@
 "use client";
 
 import {useRef, useState} from "react";
+import {useRouter} from "next/navigation";
 import AdminProductForm from "../../components/section/admin/AdminProductForm";
 import AdminProductsList from "../../components/section/admin/AdminProductsList";
 import {Plus, X} from "lucide-react";
 
 export default function AdminProductsPage() {
+    const router = useRouter();
     const dialogRef = useRef<HTMLDialogElement | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
@@ -23,6 +25,7 @@ export default function AdminProductsPage() {
     const handleSuccess = () => {
         closeDialog();
         setRefreshKey((prev) => prev + 1);
+        router.refresh();
     };
 
     return (
