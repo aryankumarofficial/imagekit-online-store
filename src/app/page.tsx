@@ -1,64 +1,42 @@
-"use client";
+import type {Metadata} from "next";
+import HomeClient from "@/app/components/home/HomeClient";
+import {connectToDatabase} from "@/lib/db";
+import Product, {IProduct} from "@/models/Product";
 
-import React, { useEffect, useState } from 'react'
-import { IProduct } from "@/models/Product";
-import { apiClient, HTTPError } from "@/lib/api-client";
-import ImageGallery from "@/app/components/section/products/ImageGallery";
-import { NotificationTypes, useNotification } from "./components/Notification"
+const pageDescription =
+    "Browse premium image assets with optimized previews, flexible licenses, and secure Razorpay checkout.";
 
+export const metadata: Metadata = {
+    title: "Premium Digital Marketplace",
+    description: pageDescription,
+    alternates: {
+        canonical: "/",
+    },
+    openGraph: {
+        title: "ImageKit Shop",
+        description: pageDescription,
+        type: "website",
+    },
+    twitter: {
+        card: "summary",
+        title: "ImageKit Shop",
+        description: pageDescription,
+    },
+};
 
-
-const Home = () => {
-    const { showNotification } = useNotification();
-    const [products, setProducts] = useState<IProduct[]>([]);
-    const [loading, setLoading] = useState(false);
-    useEffect(() => {
-        const controller = new AbortController();
-        (async () => {
-            setLoading(true);
-            try {
-                const data = await apiClient.getProducts(controller.signal);
-                setProducts(data.products);
-            } catch (e: any) {
-                console.error("Error fetching products", e);
-
-                if (e.name !== "AbortError")
-
-                    if (e instanceof HTTPError) {
-                        const errorMsg = e.body?.error || "An API Error Occurred";
-                        showNotification(errorMsg, NotificationTypes.ERROR);
-                    } else
-                        showNotification("Unknown Error Occurred", NotificationTypes.ERROR);
-            } finally {
-                setLoading(false);
-            }
-        })()
-        return () => {
-            controller.abort()
-        }
-
-    }, [showNotification]);
-
-    if (loading) {
-        return (
-            <main className="container mx-auto px-4 py-12 max-w-7xl">
-                <div className="flex justify-center items-center h-96">
-                    <span className="loading loading-spinner loading-lg"></span>
-                </div>
-            </main>
-        )
+async function getProducts(): Promise<IProduct[]> {
+    try {
+        await connectToDatabase();
+        const products = await Product.find().sort({createdAt: -1}).lean();
+        return JSON.parse(JSON.stringify(products)) as IProduct[];
+    } catch (error) {
+        console.error("Error loading homepage products", error);
+        return [];
     }
-
-    return (
-        <main className="container mx-auto px-4 py-12 max-w-7xl">
-            <div className="mb-12">
-                <h1 className="text-5xl font-extrabold mb-4">ImageKit Shop</h1>
-                <p className="text-xl text-base-content/70">
-                    High-quality products delivered with optimized images
-                </p>
-            </div>
-            <ImageGallery products={products} />
-        </main>
-    )
 }
-export default Home
+
+export default async function Home() {
+    const products = await getProducts();
+
+    return <HomeClient products={products}/>;
+}

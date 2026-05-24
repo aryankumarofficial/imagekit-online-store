@@ -4,18 +4,18 @@ import React from "react";
 
 export default function Footer() {
   return (
-    <footer className="bg-base-300 text-base-content">
-      <div className="container mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <footer className="border-t border-white/10 bg-base-100/80 text-base-content backdrop-blur-sm">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           <div>
-            <h3 className="text-lg font-bold mb-4">ImageKit Shop</h3>
-            <p className="text-sm opacity-70 max-w-xs">
-              Your premier destination for high-quality digital assets and image-based products.
+            <h3 className="mb-4 text-lg font-black tracking-tight">ImageKit Shop</h3>
+            <p className="max-w-xs text-sm leading-6 text-base-content/70">
+              A clean digital storefront for optimized image assets, flexible licenses, and instant, secure checkout.
             </p>
           </div>
 
           <div>
-            <h3 className="text-lg font-bold mb-4">Quick Links</h3>
+            <h3 className="mb-4 text-lg font-bold">Quick Links</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/" className="link link-hover">Home</Link>
@@ -33,7 +33,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-lg font-bold mb-4">Legal</h3>
+            <h3 className="mb-4 text-lg font-bold">Legal</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/privacy" className="link link-hover">Privacy Policy</Link>
@@ -50,7 +50,7 @@ export default function Footer() {
 
         <div className="divider my-8"></div>
 
-        <div className="text-center text-sm opacity-70">
+        <div className="text-center text-sm text-base-content/60">
           <p>&copy; {new Date().getFullYear()} ImageKit Shop. All rights reserved.</p>
         </div>
       </div>

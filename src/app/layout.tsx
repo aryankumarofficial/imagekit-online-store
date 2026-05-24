@@ -1,5 +1,5 @@
 import type {Metadata} from "next";
-import {Inter} from "next/font/google";
+import {Space_Grotesk} from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 import Providers from "@/app/components/Providers";
@@ -7,11 +7,36 @@ import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import React from "react";
 
-const inter = Inter({subsets: ["latin"]});
+const spaceGrotesk = Space_Grotesk({subsets: ["latin"]});
+
+const siteDescription =
+    "A premium digital marketplace for optimized image assets, flexible licenses, and secure Razorpay checkout.";
 
 export const metadata: Metadata = {
-    title: "ImageKit Store - Premium Digital Marketplace",
-    description: "Discover and purchase premium digital assets, templates, and resources",
+    metadataBase: new URL(process.env.NEXTAUTH_URL ?? "http://localhost:3000"),
+    title: {
+        default: "ImageKit Shop",
+        template: "%s | ImageKit Shop",
+    },
+    description: siteDescription,
+    alternates: {
+        canonical: "/",
+    },
+    openGraph: {
+        title: "ImageKit Shop",
+        description: siteDescription,
+        type: "website",
+        siteName: "ImageKit Shop",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "ImageKit Shop",
+        description: siteDescription,
+    },
+    robots: {
+        index: true,
+        follow: true,
+    },
 };
 
 export default function RootLayout({
@@ -22,7 +47,7 @@ export default function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
         <body
-            className={`${inter.className} antialiased min-h-screen flex flex-col`}
+            className={`${spaceGrotesk.className} antialiased min-h-screen flex flex-col`}
         >
         <Script
             src={"https://checkout.razorpay.com/v1/checkout.js"}
@@ -30,7 +55,7 @@ export default function RootLayout({
         />
         <Providers>
             <Header/>
-            <main className={"container mx-auto px-4 py-8 flex-grow"}>
+            <main className={"flex-grow w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8"}>
                 {children}
             </main>
             <Footer/>
