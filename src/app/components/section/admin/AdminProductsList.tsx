@@ -3,13 +3,12 @@
 import {useEffect, useMemo, useState} from "react";
 import {apiClient} from "@/lib/api-client";
 import {IProduct} from "@/models/Product";
-import AdminProductForm from "./AdminProductForm";
-import {Search, Trash2, Edit2, ChevronLeft, ChevronRight, Loader2} from "lucide-react";
+import Link from "next/link";
+import {Search, Trash2, Eye, ChevronLeft, ChevronRight, Loader2} from "lucide-react";
 
 export default function AdminProductsList() {
     const [products, setProducts] = useState<IProduct[]>([]);
     const [loading, setLoading] = useState(false);
-    const [selected, setSelected] = useState<IProduct | null>(null);
     const [query, setQuery] = useState("");
     const [page, setPage] = useState(1);
     const [productToDelete, setProductToDelete] = useState<IProduct | null>(null);
@@ -52,11 +51,6 @@ export default function AdminProductsList() {
         setPage((current) => Math.min(current, totalPages));
     }, [totalPages]);
 
-    const handleEdit = (p: IProduct) => {
-        setSelected(p);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
     const handleDelete = async (product: IProduct) => {
         try {
             if (!product._id) return;
@@ -67,11 +61,6 @@ export default function AdminProductsList() {
             console.error(e);
             alert("Failed to delete product");
         }
-    }
-
-    const handleSuccess = () => {
-        setSelected(null);
-        fetchProducts();
     }
 
     return (
@@ -96,13 +85,6 @@ export default function AdminProductsList() {
                 </label>
             </div>
 
-            {selected && (
-                <div className="mb-6">
-                    <h3 className="font-medium">Editing: {selected.name}</h3>
-                    <AdminProductForm initialData={selected} onSuccess={handleSuccess} />
-                </div>
-            )}
-
             <div className="overflow-x-auto">
                 <table className="table w-full">
                     <thead>
@@ -115,17 +97,24 @@ export default function AdminProductsList() {
                     </thead>
                     <tbody>
                     {paginatedProducts.map((p) => {
+                        const productId = p._id?.toString();
                         const lowest = p.variants?.reduce((m, v) => v.price < m ? v.price : m, p.variants[0]?.price || 0) || 0;
                         return (
-                            <tr key={p._id?.toString()}>
+                            <tr key={productId || p.name}>
                                 <td>{p.name}</td>
                                 <td>₹{lowest.toFixed(2)}</td>
                                 <td>{p.variants?.length || 0}</td>
                                 <td>
                                     <div className="flex gap-2">
-                                        <button className="btn btn-sm" onClick={() => handleEdit(p)}>
-                                            <Edit2 className="w-4 h-4" />
-                                        </button>
+                                        {productId ? (
+                                            <Link className="btn btn-sm" href={`/admin/products/${productId}`}>
+                                                <Eye className="w-4 h-4" />
+                                            </Link>
+                                        ) : (
+                                            <button className="btn btn-sm" disabled>
+                                                <Eye className="w-4 h-4" />
+                                            </button>
+                                        )}
                                         <button className="btn btn-sm btn-error" onClick={() => setProductToDelete(p)}>
                                             <Trash2 className="w-4 h-4" />
                                         </button>
