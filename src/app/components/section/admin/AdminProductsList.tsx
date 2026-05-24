@@ -31,14 +31,6 @@ export default function AdminProductsList() {
         fetchProducts();
     }, []);
 
-    useEffect(() => {
-        setPage(1);
-    }, [query]);
-
-    useEffect(() => {
-        setPage((current) => Math.min(current, totalPages));
-    }, [totalPages]);
-
     const filteredProducts = useMemo(() => {
         const normalizedQuery = query.trim().toLowerCase();
         if (!normalizedQuery) return products;
@@ -51,6 +43,14 @@ export default function AdminProductsList() {
 
     const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
     const paginatedProducts = filteredProducts.slice((page - 1) * pageSize, page * pageSize);
+
+    useEffect(() => {
+        setPage(1);
+    }, [query]);
+
+    useEffect(() => {
+        setPage((current) => Math.min(current, totalPages));
+    }, [totalPages]);
 
     const handleEdit = (p: IProduct) => {
         setSelected(p);
