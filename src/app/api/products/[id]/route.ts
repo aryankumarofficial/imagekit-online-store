@@ -6,6 +6,7 @@ import {z} from "zod";
 import {getServerSession} from "next-auth";
 import {authOptions} from "@/lib/auth";
 import {normalizeImagePath} from "@/lib/imagekit-url";
+import {revalidatePath} from "next/cache";
 
 async function handler(
     _request: NextRequest,
@@ -71,6 +72,12 @@ const putHandler = async (request: NextRequest, props: { params: Promise<{ id: s
             ...validation.data,
             imageUrl: normalizeImagePath(validation.data.imageUrl),
         }, { new: true });
+        
+        revalidatePath("/");
+        revalidatePath("/admin/products");
+        revalidatePath(`/admin/products/${id}`);
+        revalidatePath(`/products/${id}`);
+
         if (!updated) {
             return NextResponse.json({ error: 'Product not found' }, { status: 404 });
         }
@@ -91,6 +98,12 @@ const deleteHandler = async (request: NextRequest, props: { params: Promise<{ id
 
         const { id } = await props.params;
         const deleted = await Product.findByIdAndDelete(id);
+        
+        revalidatePath("/");
+        revalidatePath("/admin/products");
+        revalidatePath(`/admin/products/${id}`);
+        revalidatePath(`/products/${id}`);
+
         if (!deleted) {
             return NextResponse.json({ error: 'Product not found' }, { status: 404 });
         }

@@ -8,6 +8,7 @@ import {Plus, X} from "lucide-react";
 export default function AdminProductsPage() {
     const dialogRef = useRef<HTMLDialogElement | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [refreshKey, setRefreshKey] = useState(0);
 
     const openDialog = () => {
         dialogRef.current?.showModal();
@@ -17,6 +18,11 @@ export default function AdminProductsPage() {
     const closeDialog = () => {
         dialogRef.current?.close();
         setDialogOpen(false);
+    };
+
+    const handleSuccess = () => {
+        closeDialog();
+        setRefreshKey((prev) => prev + 1);
     };
 
     return (
@@ -43,7 +49,7 @@ export default function AdminProductsPage() {
                         Search, view, or delete products from the catalog. Use the detail page for edits.
                     </p>
                 </div>
-                <AdminProductsList />
+                <AdminProductsList refreshKey={refreshKey} />
             </div>
 
             <dialog ref={dialogRef} className="modal">
@@ -59,7 +65,7 @@ export default function AdminProductsPage() {
                     </div>
 
                     <div className="px-6 py-6">
-                        <AdminProductForm onSuccess={closeDialog} />
+                        <AdminProductForm onSuccess={handleSuccess} />
                     </div>
                 </div>
                 <form method="dialog" className="modal-backdrop">

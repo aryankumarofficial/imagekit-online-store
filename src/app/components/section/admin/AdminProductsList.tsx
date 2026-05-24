@@ -12,7 +12,7 @@ function getLowestPrice(product: IProduct) {
     return product.variants?.reduce((minimum, variant) => (variant.price < minimum ? variant.price : minimum), product.variants[0]?.price || 0) || 0;
 }
 
-export default function AdminProductsList() {
+export default function AdminProductsList({ refreshKey }: { refreshKey?: number }) {
     const [products, setProducts] = useState<IProduct[]>([]);
     const [loading, setLoading] = useState(false);
     const [query, setQuery] = useState("");
@@ -35,7 +35,7 @@ export default function AdminProductsList() {
 
     useEffect(() => {
         fetchProducts();
-    }, []);
+    }, [refreshKey]);
 
     useEffect(() => {
         setPage(1);

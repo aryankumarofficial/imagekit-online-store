@@ -5,6 +5,7 @@ import {getServerSession} from "next-auth";
 import {authOptions} from "@/lib/auth";
 import {z} from "zod";
 import {normalizeImagePath} from "@/lib/imagekit-url";
+import {revalidatePath} from "next/cache";
 
 const productSchema = z.object({
     name: z.string().min(1),
@@ -62,6 +63,10 @@ const postHandler = async (request: NextRequest) => {
             ...validation.data,
             imageUrl: normalizeImagePath(validation.data.imageUrl),
         });
+
+        revalidatePath("/");
+        revalidatePath("/admin/products");
+
         return NextResponse.json({
             newProduct,
         }, {
