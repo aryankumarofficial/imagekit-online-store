@@ -3,6 +3,8 @@ import HomeClient from "@/app/components/home/HomeClient";
 import {connectToDatabase} from "@/lib/db";
 import Product, {IProduct} from "@/models/Product";
 
+export const dynamic = "force-dynamic";
+
 const pageDescription =
     "Browse premium image assets with optimized previews, flexible licenses, and secure Razorpay checkout.";
 
