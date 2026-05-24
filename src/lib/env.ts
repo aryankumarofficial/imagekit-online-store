@@ -9,7 +9,7 @@ const envSchema = z.object({
   MONGODB_URI: z.string().url(),
   NEXTAUTH_SECRET: z.string().min(1),
   NEXTAUTH_URL: z.preprocess(
-    (str) => process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : str,
+    (str) => process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : (str ?? "http://localhost:3000"),
     z.string().url()
   ),
   IMAGEKIT_PUBLIC_KEY: z.string().min(1),

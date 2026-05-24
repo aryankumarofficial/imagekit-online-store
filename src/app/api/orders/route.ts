@@ -2,6 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 import {NextRequest, NextResponse} from "next/server";
+import crypto from "crypto";
 import {withDatabase} from "@/lib/withDatabase";
 import {getServerSession} from "next-auth";
 import {authOptions} from "@/lib/auth";
@@ -75,11 +76,13 @@ async function handler(req: NextRequest) {
         }
 
         const amount = Math.round(productVariant.price * 100);
+        const receiptSeed = `${product_id}:${variant.type}:${variant.license}`;
+        const receipt = `rcpt_${crypto.createHash("sha256").update(receiptSeed).digest("hex").slice(0, 20)}`;
 
         const orderOptions = {
             amount,
             currency: "INR",
-            receipt: `receipt-${product_id}-${variant.type}-${variant.license}`,
+            receipt,
             notes: {
                 productId: product_id,
                 variantType: variant.type,

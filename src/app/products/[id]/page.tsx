@@ -39,7 +39,7 @@ export async function generateMetadata({params}: ProductPageParams): Promise<Met
         openGraph: {
             title: product.name,
             description,
-            type: "product",
+            type: "website",
         },
         twitter: {
             card: "summary",

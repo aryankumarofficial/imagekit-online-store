@@ -136,13 +136,20 @@ export default function ProductDetailClient({product}: {product: IProduct}) {
                     <div className="space-y-4">
                         <h2 className="text-xl font-bold">Available Versions</h2>
                         {product.variants.map((variant) => (
-                            <button
+                            <div
                                 key={variant.type}
-                                type="button"
-                                className={`card w-full border border-white/10 bg-base-200/70 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 ${
+                                role="button"
+                                tabIndex={0}
+                                className={`card w-full border border-white/10 bg-base-200/70 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 cursor-pointer ${
                                     selectedVariant?.type === variant.type ? "ring-2 ring-primary" : ""
                                 }`}
                                 onClick={() => setSelectedVariant(variant)}
+                                onKeyDown={(event) => {
+                                    if (event.key === "Enter" || event.key === " ") {
+                                        event.preventDefault();
+                                        setSelectedVariant(variant);
+                                    }
+                                }}
                             >
                                 <div className="card-body p-4">
                                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -160,16 +167,16 @@ export default function ProductDetailClient({product}: {product: IProduct}) {
 
                                         <div className="flex items-center gap-3 sm:justify-end">
                                             <span className="text-xl font-black">₹{variant.price.toFixed(2)}</span>
-                                            <span className="btn btn-primary btn-sm" onClick={(event) => {
+                                            <button type="button" className="btn btn-primary btn-sm" onClick={(event) => {
                                                 event.stopPropagation();
                                                 handlePurchase(variant);
                                             }}>
                                                 Buy Now
-                                            </span>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                            </button>
+                            </div>
                         ))}
                     </div>
 
