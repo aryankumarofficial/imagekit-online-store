@@ -22,6 +22,36 @@ interface OrdersResponse {
     orders: IOrder[];
 }
 
+export interface AdminAnalyticsResponse {
+    summary: {
+        productCount: number;
+        userCount: number;
+        orderCount: number;
+        completedCount: number;
+        pendingCount: number;
+        failedCount: number;
+        completedRevenuePaise: number;
+        averageOrderValuePaise: number;
+    };
+    recentOrders: Array<{
+        id: string;
+        productName: string;
+        status: string;
+        amountPaise: number;
+        createdAt: string;
+    }>;
+    dailyRevenue: Array<{
+        date: string;
+        revenuePaise: number;
+        orders: number;
+    }>;
+    topProducts: Array<{
+        productName: string;
+        orders: number;
+        revenuePaise: number;
+    }>;
+}
+
 export type ProductFormData = Omit<IProduct, "_id">
 
 export interface CreateOrderData {
@@ -125,6 +155,10 @@ class ApiClient {
 
     async refreshOrderById(id: string) {
         return this.fetch(`/orders/refresh/${id}`, {cache: "no-store"})
+    }
+
+    async getAdminAnalytics() {
+        return this.fetch<AdminAnalyticsResponse>("/admin/dashboard", { cache: "no-store" });
     }
 }
 
