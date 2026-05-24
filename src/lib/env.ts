@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+const razorpaySecretSchema = z.preprocess(
+  () => process.env.RAZORPAY_SECRET_SECRET ?? process.env.RAZORPAY_KEY_SECRET ?? process.env.RAZORPAY_SECRET,
+  z.string().min(1)
+);
+
 const envSchema = z.object({
   MONGODB_URI: z.string().url(),
   NEXTAUTH_SECRET: z.string().min(1),
@@ -14,7 +19,7 @@ const envSchema = z.object({
   NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: z.string().url(),
   NEXT_PUBLIC_URL_ENDPOINT: z.string().url(),
   RAZORPAY_KEY_ID: z.string().min(1),
-  RAZORPAY_SECRET_SECRET: z.string().min(1), // Note: Keeping the name as per existing .env.example
+  RAZORPAY_SECRET_SECRET: razorpaySecretSchema,
   NEXT_PUBLIC_RAZORPAY_KEY_ID: z.string().min(1),
   RAZORPAY_WEBHOOK_SECRET: z.string().min(1),
   GMAIL_USER: z.string().email(),

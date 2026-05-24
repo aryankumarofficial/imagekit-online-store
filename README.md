@@ -107,6 +107,7 @@ NEXT_PUBLIC_URL_ENDPOINT=https://ik.imagekit.io/your-id
 ### Payments (Razorpay)
 ```env
 RAZORPAY_KEY_ID=your-key-id
+# The server accepts RAZORPAY_SECRET_SECRET, RAZORPAY_KEY_SECRET, or RAZORPAY_SECRET for the API secret.
 RAZORPAY_SECRET_SECRET=your-secret
 NEXT_PUBLIC_RAZORPAY_KEY_ID=your-key-id
 RAZORPAY_WEBHOOK_SECRET=your-webhook-secret

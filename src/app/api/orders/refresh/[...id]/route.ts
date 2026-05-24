@@ -1,18 +1,13 @@
 import {withDatabase} from "@/lib/withDatabase";
 import {NextRequest, NextResponse} from "next/server";
-import Razorpay from "razorpay";
 import Order, {OrderStatus} from "@/models/Order";
 import {getServerSession} from "next-auth";
 import {authOptions} from "@/lib/auth";
+import {getRazorpayClient} from "@/lib/razorpay";
 
 type handlerParams = {
     params: Promise<{ id: string }>
 }
-
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID!,
-    key_secret: process.env.RAZORPAY_SECRET_SECRET!,
-})
 
 async function handler(_req: NextRequest, {params}: handlerParams) {
     try {
@@ -35,6 +30,7 @@ async function handler(_req: NextRequest, {params}: handlerParams) {
             return NextResponse.json({error: "Forbidden"}, {status: 403});
         }
 
+        const razorpay = getRazorpayClient();
 
         const pays = (await razorpay.orders.fetchPayments(id.toString())).items;
 
@@ -95,7 +91,7 @@ async function handler(_req: NextRequest, {params}: handlerParams) {
         console.error("Error fetching order", e);
         return NextResponse.json({
             code: e.statusCode,
-            error: e.error || "Failed to refresh ",
+            error: e.message || e.error || "Failed to refresh",
             success: false
         }, {status: e.statusCode});
     }

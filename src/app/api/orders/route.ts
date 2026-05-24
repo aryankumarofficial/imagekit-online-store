@@ -1,13 +1,13 @@
 // /api/orders - CREATE ORDER
 
 export const dynamic = 'force-dynamic'
-import Razorpay from "razorpay";
 import {NextRequest, NextResponse} from "next/server";
 import {withDatabase} from "@/lib/withDatabase";
 import {getServerSession} from "next-auth";
 import {authOptions} from "@/lib/auth";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
+import {getRazorpayClient} from "@/lib/razorpay";
 import {z} from "zod";
 
 type ProductVariantRecord = {
@@ -19,13 +19,6 @@ type ProductVariantRecord = {
 type LeanProductRecord = {
     variants: ProductVariantRecord[];
 };
-
-
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID!,
-    key_secret: process.env.RAZORPAY_SECRET_SECRET!,
-})
-
 const orderSchema = z.object({
     product_id: z.string().min(1),
     variant: z.object({
@@ -58,6 +51,7 @@ async function handler(req: NextRequest) {
         }
 
         const {product_id, variant} = validation.data;
+        const razorpay = getRazorpayClient();
 
         const product = await Product.findById(product_id).lean<LeanProductRecord>();
         if (!product) {
@@ -118,6 +112,13 @@ async function handler(req: NextRequest) {
 
     } catch (err) {
         console.log(err);
+        if (err instanceof Error && err.message.startsWith("Razorpay")) {
+            return NextResponse.json({
+                error: err.message,
+            }, {
+                status: 500,
+            });
+        }
         return NextResponse.json({
             error: "An error occurred",
         }, {
