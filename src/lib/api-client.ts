@@ -95,6 +95,21 @@ class ApiClient {
         })
     }
 
+    async updateProduct(id: string, data: Partial<IProduct>) {
+        const encodedId = encodeURIComponent(id);
+        return this.fetch<ProductResponse>(`/products/${encodedId}`, {
+            method: "PUT",
+            body: data,
+        })
+    }
+
+    async deleteProduct(id: string) {
+        const encodedId = encodeURIComponent(id);
+        return this.fetch<{ success: boolean }>(`/products/${encodedId}`, {
+            method: "DELETE",
+        })
+    }
+
     async getUserOrders() {
 
         return this.fetch<OrdersResponse>("/orders/user", {cache: "no-store",})

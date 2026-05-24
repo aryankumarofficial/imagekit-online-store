@@ -1,15 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import FileUpload from "../imagekit/FileUpload";
 import { IKUploadResponse } from "imagekitio-next/dist/types/components/IKUpload/props";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { useNotification } from "../../Notification";
-import { IMAGE_VARIANTS, ImageVariantType } from "@/models/Product";
+import { IMAGE_VARIANTS, ImageVariantType, IProduct } from "@/models/Product";
 import { apiClient, ProductFormData } from "@/lib/api-client";
 
-export default function AdminProductForm() {
+type Props = {
+    initialData?: IProduct | null;
+    onSuccess?: () => void;
+}
+
+export default function AdminProductForm({ initialData = null, onSuccess }: Props) {
     const [loading, setLoading] = useState(false);
     const { showNotification } = useNotification();
 
@@ -34,6 +39,15 @@ export default function AdminProductForm() {
         },
     });
 
+    useEffect(() => {
+        if (initialData) {
+            setValue("name", initialData.name);
+            setValue("description", initialData.description);
+            setValue("imageUrl", initialData.imageUrl);
+            setValue("variants", initialData.variants as any);
+        }
+    }, [initialData, setValue]);
+
     const { fields, append, remove } = useFieldArray({
         control,
         name: "variants",
@@ -50,23 +64,30 @@ export default function AdminProductForm() {
     const onSubmit = async (data: ProductFormData) => {
         setLoading(true);
         try {
-            await apiClient.createProduct(data);
-            showNotification("Product created successfully!", "success");
+            if (initialData && initialData._id) {
+                await apiClient.updateProduct(initialData._id.toString(), data as any);
+                showNotification("Product updated successfully!", "success");
+            } else {
+                await apiClient.createProduct(data as any);
+                showNotification("Product created successfully!", "success");
 
-            // Reset form after successful submission
-            setValue("name", "");
-            setValue("description", "");
-            setValue("imageUrl", "");
-            setValue("variants", [
-                {
-                    type: "SQUARE" as ImageVariantType,
-                    price: 9.99,
-                    license: "personal",
-                },
-            ]);
+                // Reset form after successful creation
+                setValue("name", "");
+                setValue("description", "");
+                setValue("imageUrl", "");
+                setValue("variants", [
+                    {
+                        type: "SQUARE" as ImageVariantType,
+                        price: 9.99,
+                        license: "personal",
+                    },
+                ]);
+            }
+
+            if (onSuccess) onSuccess();
         } catch (error) {
             showNotification(
-                error instanceof Error ? error.message : "Failed to create product",
+                error instanceof Error ? error.message : "Failed to save product",
                 "error"
             );
         } finally {
