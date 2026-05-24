@@ -40,7 +40,10 @@ export default function AdminProductForm() {
     });
 
     const handleUploadSuccess = (response: IKUploadResponse) => {
-        setValue("imageUrl", response.filePath);
+        // Construct full public URL using the configured ImageKit endpoint
+        const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || process.env.NEXT_PUBLIC_URL_ENDPOINT || "";
+        const fullUrl = `${urlEndpoint}${response.filePath}`;
+        setValue("imageUrl", fullUrl);
         showNotification("Image uploaded successfully!", "success");
     };
 

@@ -8,7 +8,8 @@ import {z} from "zod";
 const productSchema = z.object({
     name: z.string().min(1),
     description: z.string().min(1),
-    imageUrl: z.string().url(),
+    // ImageKit returns a filePath (relative path) so accept non-empty strings
+    imageUrl: z.string().min(1),
     variants: z.array(z.object({
         type: z.enum(["SQUARE", "WIDE", "PORTRAIT"]),
         price: z.number().positive(),

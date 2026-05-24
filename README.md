@@ -119,14 +119,31 @@ GMAIL_USER=your-gmail@gmail.com
 GMAIL_PASSWORD=your-app-password
 ```
 
-## 🛠️ Admin Auto-Creation
+## 🛠️ Bootstrap Accounts
 
-On the first server start (or database connection), the application will check for an existing admin user.
-- **If no admin exists:**
-  - A new admin user will be created.
-  - A secure random password will be generated.
-  - Credentials will be emailed to `aryanak9163@gmail.com` using the configured Gmail credentials.
-  - **Important:** Ensure `GMAIL_USER` and `GMAIL_PASSWORD` are correctly set up to receive this email.
+On the first server start (or database connection), the application will check for bootstrap accounts.
+
+- **Admin account:**
+   - If `ADMIN_EMAIL` is set and no admin exists, a new admin user is created.
+   - A secure random password is generated.
+   - Credentials are emailed using the configured Gmail credentials.
+   - In production, automatic admin seeding is skipped unless `ALLOW_AUTO_ADMIN_SEED=true`.
+
+- **Verification test account:**
+   - If `TEST_USER_EMAIL` and `TEST_USER_PASSWORD` are set, a verified test user is created automatically.
+   - In production, automatic test-user seeding is skipped unless `ALLOW_AUTO_TEST_USER_SEED=true`.
+   - Use this account for Razorpay team verification and app walkthroughs.
+
+These values are also listed in [.env.example](.env.example) for local setup.
+
+### Suggested verification env vars
+```env
+ADMIN_EMAIL=admin@example.com
+TEST_USER_EMAIL=razorpay-test@example.com
+TEST_USER_PASSWORD=choose-a-strong-password
+ALLOW_AUTO_ADMIN_SEED=true
+ALLOW_AUTO_TEST_USER_SEED=true
+```
 
 ## 📁 Project Structure
 
