@@ -3,10 +3,20 @@ import { env } from "@/lib/env";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 
-const ADMIN_EMAIL = "aryanak9163@gmail.com";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
 export async function ensureAdminUser() {
     try {
+        if (process.env.NODE_ENV === "production" && process.env.ALLOW_AUTO_ADMIN_SEED !== "true") {
+            console.warn("Skipping automatic admin bootstrap in production.");
+            return;
+        }
+
+        if (!ADMIN_EMAIL) {
+            console.warn("ADMIN_EMAIL is not set; skipping automatic admin bootstrap.");
+            return;
+        }
+
         console.log("Checking for admin user...");
         const existingAdmin = await User.findOne({ email: ADMIN_EMAIL });
         if (existingAdmin) {

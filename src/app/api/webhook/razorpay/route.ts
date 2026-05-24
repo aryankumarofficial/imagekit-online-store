@@ -28,6 +28,15 @@ async function handler(request: NextRequest) {
         if (event.event === "payment.captured") {
             const payment = event.payload.payment.entity;
             try {
+                const existingOrder = await Order.findOne({razorpayOrderId: payment.order_id}).populate([
+                    {path: "productId", select: "name", model: "Product"},
+                    {path: "userId", select: "email", model: "User"}
+                ]);
+
+                if (existingOrder?.status === OrderStatus.COMPLETED && existingOrder.razorpayPaymentId === payment.id) {
+                    return NextResponse.json({message: "Already processed"}, {status: 200});
+                }
+
                 const order = await Order.findOneAndUpdate({
                     razorpayOrderId: payment.order_id,
                 }, {
@@ -60,6 +69,15 @@ async function handler(request: NextRequest) {
         if (event.event === "payment.failed") {
             const payment = event.payload.payment.entity;
             try {
+                const existingOrder = await Order.findOne({razorpayOrderId: payment.order_id}).populate([
+                    {path: "productId", select: "name", model: "Product"},
+                    {path: "userId", select: "email", model: "User"}
+                ]);
+
+                if (existingOrder?.status === OrderStatus.FAILED && existingOrder.razorpayPaymentId === payment.id) {
+                    return NextResponse.json({message: "Already processed"}, {status: 200});
+                }
+
                 const order = await Order.findOneAndUpdate({
                     razorpayOrderId: payment.order_id,
                 }, {

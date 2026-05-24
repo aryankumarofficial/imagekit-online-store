@@ -1,15 +1,15 @@
 "use client";
 
-import React, {useEffect, useState} from 'react'
-import {IProduct} from "@/models/Product";
-import {apiClient, HTTPError} from "@/lib/api-client";
+import React, { useEffect, useState } from 'react'
+import { IProduct } from "@/models/Product";
+import { apiClient, HTTPError } from "@/lib/api-client";
 import ImageGallery from "@/app/components/section/products/ImageGallery";
-import {NotificationTypes, useNotification} from "./components/Notification"
+import { NotificationTypes, useNotification } from "./components/Notification"
 
 
 
 const Home = () => {
-    const {showNotification} = useNotification();
+    const { showNotification } = useNotification();
     const [products, setProducts] = useState<IProduct[]>([]);
     const [loading, setLoading] = useState(false);
     useEffect(() => {
@@ -33,7 +33,7 @@ const Home = () => {
                 setLoading(false);
             }
         })()
-        return ()=>{
+        return () => {
             controller.abort()
         }
 
@@ -57,7 +57,7 @@ const Home = () => {
                     High-quality products delivered with optimized images
                 </p>
             </div>
-            <ImageGallery products={products}/>
+            <ImageGallery products={products} />
         </main>
     )
 }

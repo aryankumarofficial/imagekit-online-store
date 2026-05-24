@@ -99,7 +99,7 @@ userSchema.pre("save", async function (next) {
     }
     next();
 });
-userSchema.index({email: 1});
+userSchema.index({email: 1}, {unique: true});
 
 
 const User = (models.User as IUserSchema || model<IUserDocument, IUserSchema>("User", userSchema));

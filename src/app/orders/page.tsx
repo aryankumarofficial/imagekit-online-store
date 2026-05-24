@@ -9,7 +9,16 @@ import {apiClient} from "@/lib/api-client";
 import {Download, Loader2, LucideBadgeIndianRupee, RefreshCw} from "lucide-react";
 import {NotificationTypes, useNotification} from "@/app/components/Notification";
 import {useRouter} from "next/navigation";
-import mongoose from "mongoose"
+
+type PopulatedProduct = {
+    _id: string;
+    name: string;
+    imageUrl: string;
+};
+
+function isPopulatedProduct(value: unknown): value is PopulatedProduct {
+    return typeof value === "object" && value !== null && "imageUrl" in value && "name" in value;
+}
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState<IOrder[]>([]);
@@ -56,20 +65,21 @@ export default function OrdersPage() {
 
     const handleRepay = async (order: IOrder) => {
         try {
-            if (order.productId instanceof mongoose.Types.ObjectId) {
+            if (!isPopulatedProduct(order.productId)) {
                 showNotification("Product details not found. Cannot proceed with payment.", NotificationTypes.WARNING)
                 throw new Error("Product details not found. Cannot proceed with payment.");
             }
 
             const options = {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-                amount: Math.round(order.amount),
+                amount: order.amount,
                 currency: "INR",
                 name: "ImageKit Shop",
                 description: `${order.productId.name} - ${order.variant.type} Version`,
                 order_id: order.razorpayOrderId,
                 handler: async function () {
                     showNotification("Payment successful!", NotificationTypes.SUCCESS)
+                    await apiClient.refreshOrderById(order.razorpayOrderId);
                     router.push("/orders");
                     await fetchOrders();
                 },
@@ -100,12 +110,11 @@ export default function OrdersPage() {
             <h1 className="text-3xl font-bold mb-8">My Orders</h1>
             <div className="space-y-6">
                 {orders.length > 0 && orders.map((order) => {
-                    const variantDimensions =
-                        IMAGE_VARIANTS[
-                            order.variant.type.toUpperCase() as keyof typeof IMAGE_VARIANTS
-                            ].dimensions;
+                    const variantDimensions = IMAGE_VARIANTS[
+                        order.variant.type.toUpperCase() as keyof typeof IMAGE_VARIANTS
+                        ].dimensions;
 
-                    const product = order.productId as any;
+                    const product = isPopulatedProduct(order.productId) ? order.productId : null;
 
                     return (
                         <div
@@ -122,9 +131,9 @@ export default function OrdersPage() {
                                             aspectRatio: `${variantDimensions.width} / ${variantDimensions.height}`,
                                         }}
                                     >
-                                        <IKImage
+                                            <IKImage
                                             urlEndpoint={process.env.NEXT_PUBLIC_URL_ENDPOINT!}
-                                            path={product.imageUrl}
+                                                path={product?.imageUrl || ""}
                                             alt={`Order ${order._id?.toString().slice(-6)}`}
                                             transformation={[
                                                 {
@@ -181,7 +190,7 @@ export default function OrdersPage() {
                                                 </p>
                                                 {order.status === "completed" ? (
                                                     <a
-                                                        href={`${process.env.NEXT_PUBLIC_URL_ENDPOINT}/tr:q-100,w-${variantDimensions.width},h-${variantDimensions.height},cm-extract,fo-center${product.imageUrl}`}
+                                                        href={`${process.env.NEXT_PUBLIC_URL_ENDPOINT}/tr:q-100,w-${variantDimensions.width},h-${variantDimensions.height},cm-extract,fo-center${product?.imageUrl}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="btn btn-primary gap-2"

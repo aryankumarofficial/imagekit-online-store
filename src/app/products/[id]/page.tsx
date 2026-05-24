@@ -73,13 +73,14 @@ export default function ProductPage() {
 
             const options = {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-                amount: Math.round(amount * 100),
+                amount,
                 currency: "INR",
                 name: "ImageKit Shop",
                 description: `${product.name} - ${variant.type} Version`,
                 order_id: orderId,
-                handler: function () {
+                handler: async function () {
                     showNotification("Payment successful!", "success");
+                    await apiClient.refreshOrderById(orderId);
                     router.push("/orders");
                 },
                 prefill: {

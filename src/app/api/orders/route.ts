@@ -7,7 +7,18 @@ import {withDatabase} from "@/lib/withDatabase";
 import {getServerSession} from "next-auth";
 import {authOptions} from "@/lib/auth";
 import Order from "@/models/Order";
+import Product from "@/models/Product";
 import {z} from "zod";
+
+type ProductVariantRecord = {
+    type: "SQUARE" | "WIDE" | "PORTRAIT";
+    price: number;
+    license: "personal" | "commercial";
+};
+
+type LeanProductRecord = {
+    variants: ProductVariantRecord[];
+};
 
 
 const razorpay = new Razorpay({
@@ -19,7 +30,6 @@ const orderSchema = z.object({
     product_id: z.string().min(1),
     variant: z.object({
         type: z.enum(["SQUARE", "WIDE", "PORTRAIT"]),
-        price: z.number().positive(),
         license: z.enum(["personal", "commercial"])
     })
 });
@@ -49,12 +59,37 @@ async function handler(req: NextRequest) {
 
         const {product_id, variant} = validation.data;
 
+        const product = await Product.findById(product_id).lean<LeanProductRecord>();
+        if (!product) {
+            return NextResponse.json({
+                error: "Product not found"
+            }, {
+                status: 404
+            });
+        }
+
+        const productVariant = product.variants.find(
+            (item) => item.type === variant.type && item.license === variant.license
+        );
+
+        if (!productVariant) {
+            return NextResponse.json({
+                error: "Selected product variant is not available"
+            }, {
+                status: 400
+            });
+        }
+
+        const amount = Math.round(productVariant.price * 100);
+
         const orderOptions = {
-            amount: Math.round(variant.price * 100),
+            amount,
             currency: "INR",
-            receipt: `receipt-${product_id}`,
+            receipt: `receipt-${product_id}-${variant.type}-${variant.license}`,
             notes: {
                 productId: product_id,
+                variantType: variant.type,
+                variantLicense: variant.license,
             }, // take it seriously for filter purpose
         }
 
@@ -64,9 +99,9 @@ async function handler(req: NextRequest) {
         const newOrder = await Order.create({
             userId: session.user.id,
             productId: product_id,
-            variant: variant,
+            variant: productVariant,
             razorpayOrderId: order.id,
-            amount: Math.round(variant.price * 100),
+            amount,
             status: "pending",
         });
 

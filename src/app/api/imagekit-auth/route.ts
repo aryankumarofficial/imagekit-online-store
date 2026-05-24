@@ -1,6 +1,8 @@
 import ImageKit from "imagekit";
 import {NextResponse} from "next/server";
 import {withDatabase} from "@/lib/withDatabase";
+import {getServerSession} from "next-auth";
+import {authOptions} from "@/lib/auth";
 
 const imagekit = new ImageKit({
     publicKey: process.env.IMAGEKIT_PUBLIC_KEY!,
@@ -10,6 +12,11 @@ const imagekit = new ImageKit({
 
 const handler = async () => {
     try {
+        const session = await getServerSession(authOptions);
+        if (!session || session.user.role !== "admin") {
+            return NextResponse.json({error: "Unauthorized"}, {status: 401});
+        }
+
         const authenticationParameters = imagekit.getAuthenticationParameters();
         return NextResponse.json(authenticationParameters, {
             status: 200,

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import {usePathname} from "next/navigation";
 import {ImageKitProvider} from "imagekitio-next";
 import {SessionProvider} from "next-auth/react";
 import {NotificationProvider} from "@/app/components/Notification";
@@ -9,6 +10,7 @@ const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!
 const publicKey = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!;
 
 export default function Providers({children}: { children: React.ReactNode }) {
+    const pathname = usePathname();
     const authenticator = async () => {
         try {
             const response = await fetch('/api/imagekit-auth');
@@ -18,7 +20,6 @@ export default function Providers({children}: { children: React.ReactNode }) {
             }
 
             const data = await response.json();
-            console.log("kit data", data);
             const {signature, token, expire} = data;
             return {signature, token, expire};
         } catch (error: any) {
@@ -33,7 +34,7 @@ export default function Providers({children}: { children: React.ReactNode }) {
                 <ImageKitProvider
                     urlEndpoint={urlEndpoint}
                     publicKey={publicKey}
-                    authenticator={authenticator}
+                    authenticator={pathname?.startsWith("/admin") ? authenticator : undefined}
                 >
                     {children}
                 </ImageKitProvider>

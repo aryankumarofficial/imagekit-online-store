@@ -1,5 +1,5 @@
 import {NextRequest, NextResponse} from "next/server";
-import {connectToDatabase, disconnect} from "./db"
+import {connectToDatabase} from "./db"
 
 type APIHandler = (
     req: NextRequest,
@@ -20,9 +20,6 @@ export async function withDatabase(handler: APIHandler) {
             console.error("API route Error: ", e);
             return NextResponse.json({error: "An internal server error occurred."},
                 {status: 500})
-        } finally {
-            await disconnect();
-            console.log("Database connection closed.");
         }
     }
 }

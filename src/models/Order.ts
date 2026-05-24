@@ -67,5 +67,8 @@ const orderSchema = new Schema<IOrder>(
     {timestamps: true}
 );
 
+orderSchema.index({razorpayOrderId: 1}, {unique: true});
+orderSchema.index({userId: 1, createdAt: -1});
+
 const Order = models?.Order || model<IOrder>("Order", orderSchema);
 export default Order;

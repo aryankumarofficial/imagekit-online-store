@@ -32,6 +32,7 @@ export default function Register() {
 
             if (!res.ok) {
                 showNotification(data.error || "Registration failed", NotificationTypes.ERROR);
+                return;
             }
 
             showNotification("Registration successful! Please log in.", NotificationTypes.SUCCESS);
